@@ -1,6 +1,0 @@
-Con: Once trained, its determiniastic selection, which is not good for a game involving probabity
-Does not take the other person's action into consideration
-
-
-
-Most basic (no feature extraction) trained against random agent:
