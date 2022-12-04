@@ -74,7 +74,7 @@ class QLearningAgent:
     def get_q_value(self, state, action):
 
         simple_state = list(state.get_cur_player_die_count())
-        s_state = [state.wager_count, state.wager_num, simple_state[state.wager_num],
+        s_state = [state.wager_count, state.wager_num - simple_state[state.wager_num],
                    simple_state.index(max(simple_state))]
         simple_state = tuple(s_state)
 
@@ -97,7 +97,7 @@ class QLearningAgent:
     def update(self, state, action, new_state):
 
         simple_state = list(state.get_cur_player_die_count())
-        s_state = [state.wager_count, state.wager_num, simple_state[state.wager_num],
+        s_state = [state.wager_count, state.wager_num - simple_state[state.wager_num],
                    simple_state.index(max(simple_state))]
         simple_state = tuple(s_state)
         if (simple_state, action) in self.q:
