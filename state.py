@@ -21,23 +21,22 @@ class State:
     def possible_actions(self):
         # (wager_num, wager_count)
         # (-1, -1) is call liar
-        actions = [(-1, -1)]
-        for i in range(self.wager_num, 6):
-            for j in range(self.wager_count + 1, self.total_dice):
-                actions.append((i, j))
+        actions = [i for i in range(len(self.die_count))]
+        actions.append(-1)
         return actions
 
     def next(self, action):
         if action not in self.possible_actions():
+            print(action)
             raise Exception("Invalid move")
-        if action == (-1, -1):
+        if action == -1:
             self.called = True
         else:
-            self.wager_num, self.wager_count = action
+            self.wager_num, self.wager_count = action, self.wager_count + 1
         self.cur_player += 1
         if self.cur_player >= len(self.players):
             self.cur_player = 0
-        self.last_action = action
+        self.last_action = self.wager_num, self.wager_count
 
     def get_next(self, action):
         new_state = copy.deepcopy(self)
@@ -51,7 +50,7 @@ class State:
         return self.die_count[self.wager_num] < self.wager_count
 
     def get_reward(self, action):
-        if action == (-1, -1):
+        if action == -1:
             # win
             if self.die_count[self.wager_num] < self.wager_count:
                 return 100

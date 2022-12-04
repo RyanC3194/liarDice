@@ -119,6 +119,7 @@ def graph(dir):
 num_of_die = 6
 
 if __name__ == "__main__":
+
     agent = QLearningAgent()
     train2(agent, QLearningAgent())
     graph("q_tables")

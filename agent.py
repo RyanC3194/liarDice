@@ -18,12 +18,10 @@ class UserAgent:
     def get_action(self, state):
         print(state.possible_actions())
         die_num = int(input("Face of the die?"))
-        die_count = int(input("How many?"))
-        while (die_num, die_count) not in state.possible_actions():
+        while die_num not in state.possible_actions():
             die_num = int(input("Face of the die?"))
-            die_count = int(input("How many?"))
 
-        return die_num, die_count
+        return die_num
 
 
 class ProbabilityAgent:
@@ -43,13 +41,14 @@ class ProbabilityAgent:
             prob += math.comb(num_of_die, i) * (1 / num_of_die) ** i * (num_of_die - 1 / num_of_die) ** (num_of_die - i)
         # arbitrary threshold
         if prob < 0.5:
-            return -1, -1
+            return -1
 
         # try not the bluff first
         not_bluff_moves = []
         for i in range(face, len(die_count)):
-            for j in range(d_count, die_count[i]):
-                not_bluff_moves.append((i, j + 1))
+            if d_count <  die_count[i]:
+                not_bluff_moves.append(i)
+
         if not_bluff_moves:
             return random.choice(not_bluff_moves)
         return random.choice(state.possible_actions())
@@ -73,36 +72,16 @@ class QLearningAgent:
         return random.choice(best_actions)
 
     def get_q_value(self, state, action):
-        dice_count = state.get_cur_player_die_count()
 
-        face, d_count = state.wager_num, state.wager_count
-
-        simple_state = d_count - dice_count[face]
-
-        # simple_state = state.get_cur_player_die_count()
+        simple_state = list(state.get_cur_player_die_count())
+        simple_state.append(state.wager_count)
+        simple_state.append(state.wager_num)
+        simple_state = tuple(simple_state)
 
         q = 0
         if (simple_state, action) in self.q:
             q += self.q[(simple_state, action)]
 
-        elif action == (-1, -1):
-            #print("..")
-            face, d_count = state.wager_num, state.wager_count
-            die_count = state.get_cur_player_die_count()
-            num_of_die = len(die_count)
-            opp_need = d_count - die_count[face]
-            # binomial distribution
-            if opp_need < 0:
-                opp_need = 0
-            prob = 0
-            for i in range(opp_need, num_of_die + 1):
-                prob += math.comb(num_of_die, i) * (1 / num_of_die) ** i * (num_of_die - 1 / num_of_die) ** (
-                            num_of_die - i)
-            q = prob * 10
-        else:
-            # encourage exploring
-            #print("..")
-            q = 200
 
         return q
 
@@ -117,14 +96,10 @@ class QLearningAgent:
 
     def update(self, state, action, new_state):
 
-
-        dice_count = state.get_cur_player_die_count()
-
-        face, d_count = state.wager_num, state.wager_count
-
-        simple_state = d_count - dice_count[face]
-
-        # simple_state = state.get_cur_player_die_count()
+        simple_state = list(state.get_cur_player_die_count())
+        simple_state.append(state.wager_count)
+        simple_state.append(state.wager_num)
+        simple_state = tuple(simple_state)
         if (simple_state, action) in self.q:
             self.q[(simple_state, action)] = (1 - self.alpha) * self.q[(simple_state, action)] + self.alpha * (
                     state.get_reward(action) + self.get_max_q_value(new_state) * self.gamma)
